@@ -44,8 +44,8 @@ const WelcomeScreen = () => {
     const translateX = useSharedValue(0);
     const opacity = useSharedValue(1);
 
-    const navigateToCamera = () => {
-        navigation.navigate('Camera');
+    const navigateToCaptureOptions = () => {
+        navigation.navigate('CaptureOptions');
     };
 
     const gestureHandler = useAnimatedGestureHandler<PanGestureHandlerGestureEvent,
@@ -70,7 +70,7 @@ const WelcomeScreen = () => {
                     if (translateX.value > ACTIVATION_THRESHOLD) {
                         // Snap to end and navigate
                         translateX.value = withSpring(SLIDER_EFFECTIVE_WIDTH, {}, () => {
-                            runOnJS(navigateToCamera)();
+                            runOnJS(navigateToCaptureOptions)();
                         });
                         opacity.value = 0;
                     } else {

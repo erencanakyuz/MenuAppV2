@@ -7,6 +7,7 @@ import WelcomeScreen from '../screens/WelcomeScreen';
 import CameraScreen from '../screens/CameraScreen';
 import MenuListScreen from '../screens/MenuListScreen';
 import FoodDetailScreen from '../screens/FoodDetailScreen';
+import CaptureOptionsScreen from '../screens/CaptureOptionsScreen';
 
 // Define MenuItem type here or import from a types.ts file
 export interface MenuItem {
@@ -26,6 +27,7 @@ export interface MenuItem {
 
 export type RootStackParamList = {
     Welcome: undefined;
+    CaptureOptions: undefined;
     Camera: undefined;
     MenuList: { imageUri: string | null }; // For the overall scanned image URI
     FoodDetail: { foodItem: MenuItem }; // Use the specific MenuItem type
@@ -50,6 +52,7 @@ const AppNavigator = () => {
                 }}
             >
                 <Stack.Screen name="Welcome" component={WelcomeScreen} />
+                <Stack.Screen name="CaptureOptions" component={CaptureOptionsScreen} />
                 <Stack.Screen name="Camera" component={CameraScreen} />
                 <Stack.Screen name="MenuList" component={MenuListScreen} />
                 <Stack.Screen name="FoodDetail" component={FoodDetailScreen} />
