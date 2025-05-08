@@ -1,7 +1,10 @@
 import React, { useRef, useState, useEffect } from 'react';
-import { View, StyleSheet, TouchableOpacity, Text, ActivityIndicator, Linking } from 'react-native';
+import { View, StyleSheet, TouchableOpacity, Text, ActivityIndicator, Linking, Dimensions } from 'react-native';
 import { Camera, useCameraDevice, useCameraFormat, useCameraPermission } from 'react-native-vision-camera';
 import { useNavigation } from '@react-navigation/native';
+import Animated, { useSharedValue, useAnimatedStyle, withRepeat, withTiming, Easing } from 'react-native-reanimated';
+
+const { width, height } = Dimensions.get('window');
 
 const CameraScreen = () => {
     const navigation = useNavigation();
@@ -9,6 +12,23 @@ const CameraScreen = () => {
     const device = useCameraDevice('back'); // 'front' veya 'back'
     const cameraRef = useRef<Camera>(null);
     const [isActive, setIsActive] = useState(true); // Kamera aktifliği
+
+    // Scanning animation
+    const scanLinePosition = useSharedValue(0);
+
+    useEffect(() => {
+        scanLinePosition.value = withRepeat(
+            withTiming(height * 0.6, { duration: 3000, easing: Easing.linear }),
+            -1, // Infinite repeat
+            true // Reverse direction
+        );
+    }, [scanLinePosition, height]);
+
+    const animatedScanLineStyle = useAnimatedStyle(() => {
+        return {
+            transform: [{ translateY: scanLinePosition.value }],
+        };
+    });
 
     // İzinleri kontrol et
     useEffect(() => {
@@ -21,6 +41,13 @@ const CameraScreen = () => {
     useEffect(() => {
         const unsubscribeFocus = navigation.addListener('focus', () => {
             setIsActive(true);
+            // Restart animation on focus
+            scanLinePosition.value = 0; // Reset position
+            scanLinePosition.value = withRepeat(
+                withTiming(height * 0.6, { duration: 3000, easing: Easing.linear }),
+                -1,
+                true
+            );
         });
         const unsubscribeBlur = navigation.addListener('blur', () => {
             setIsActive(false);
@@ -60,8 +87,8 @@ const CameraScreen = () => {
         return (
             <View style={styles.centered}>
                 <Text>Kamera izni gerekiyor.</Text>
-                <TouchableOpacity onPress={requestPermission}><Text>İzin İste</Text></TouchableOpacity>
-                <TouchableOpacity onPress={() => Linking.openSettings()}><Text>Ayarları Aç</Text></TouchableOpacity>
+                <TouchableOpacity onPress={requestPermission}><Text style={styles.permissionButtonText}>İzin İste</Text></TouchableOpacity>
+                <TouchableOpacity onPress={() => Linking.openSettings()}><Text style={styles.permissionButtonText}>Ayarları Aç</Text></TouchableOpacity>
             </View>
         );
     }
@@ -69,8 +96,8 @@ const CameraScreen = () => {
     if (device == null) {
         return (
             <View style={styles.centered}>
-                <ActivityIndicator size="large" />
-                <Text>Kamera yükleniyor...</Text>
+                <ActivityIndicator size="large" color="#FFF" />
+                <Text style={styles.loadingText}>Kamera yükleniyor...</Text>
             </View>
         );
     }
@@ -82,7 +109,7 @@ const CameraScreen = () => {
     // ])
 
     return (
-        <View style={styles.containerLight}>
+        <View style={styles.container}>
             <Camera
                 ref={cameraRef}
                 style={StyleSheet.absoluteFill}
@@ -99,11 +126,17 @@ const CameraScreen = () => {
             // frameProcessorFps={5} // Saniyede kaç kare işleneceği
             />
 
+            {/* Viewfinder/Scanning Area Overlay */}
+            <View style={styles.viewfinder}>
+                <Animated.View style={[styles.scanLine, animatedScanLineStyle]} />
+                {/* You can add corner brackets or other UI elements for the viewfinder here */}
+            </View>
+
             {/* Buraya kendi butonlarınızı ve overlay'lerinizi ekleyebilirsiniz */}
             {/* Örnek çekim butonu */}
             <View style={styles.controlsContainer}>
                 <TouchableOpacity style={styles.captureButton} onPress={takePicture}>
-                    <Text>ÇEK</Text>
+                    <View style={styles.captureButtonInner} />
                 </TouchableOpacity>
             </View>
 
@@ -115,10 +148,71 @@ const CameraScreen = () => {
 
 // Stillerinizi buraya ekleyin (mevcut CameraScreen.tsx dosyanızdaki gibi)
 const styles = StyleSheet.create({
-    containerLight: { flex: 1, backgroundColor: '#f0f0f0' },
-    centered: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-    controlsContainer: { position: 'absolute', bottom: 50, left: 0, right: 0, alignItems: 'center' },
-    captureButton: { width: 70, height: 70, borderRadius: 35, backgroundColor: 'white', justifyContent: 'center', alignItems: 'center' },
+    container: {
+        flex: 1,
+        backgroundColor: '#000', // Darker background
+    },
+    centered: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: '#000', // Consistent background
+    },
+    permissionButtonText: {
+        color: '#1E90FF', // DodgerBlue for links
+        marginTop: 10,
+        fontSize: 16,
+    },
+    loadingText: {
+        marginTop: 10,
+        color: '#FFF',
+        fontSize: 16,
+    },
+    viewfinder: {
+        position: 'absolute',
+        top: '20%', // Adjust as needed
+        left: '10%', // Adjust as needed
+        width: '80%', // Adjust as needed
+        height: '60%', // Adjust as needed
+        // borderWidth: 2,
+        // borderColor: 'rgba(255, 255, 255, 0.5)',
+        // borderRadius: 10,
+        overflow: 'hidden', // Important for the scan line
+    },
+    scanLine: {
+        width: '100%',
+        height: 2,
+        backgroundColor: 'rgba(0, 255, 0, 0.7)', // Greenish scanning line
+        shadowColor: '#0F0',
+        shadowOpacity: 1,
+        shadowRadius: 10,
+        shadowOffset: { width: 0, height: 0 },
+    },
+    controlsContainer: {
+        position: 'absolute',
+        bottom: 40, // Adjusted for modern look
+        left: 0,
+        right: 0,
+        flexDirection: 'row', // Align items in a row if you add more controls
+        justifyContent: 'center', // Center the capture button
+        alignItems: 'center',
+    },
+    captureButton: {
+        width: 80, // Larger button
+        height: 80,
+        borderRadius: 40, // Perfect circle
+        backgroundColor: 'rgba(255, 255, 255, 0.2)', // Semi-transparent white
+        justifyContent: 'center',
+        alignItems: 'center',
+        borderWidth: 2,
+        borderColor: 'rgba(255, 255, 255, 0.5)',
+    },
+    captureButtonInner: {
+        width: 60, // Inner circle
+        height: 60,
+        borderRadius: 30,
+        backgroundColor: 'white',
+    },
     // ... diğer stilleriniz
 });
 
