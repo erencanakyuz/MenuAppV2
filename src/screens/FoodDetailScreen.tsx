@@ -9,7 +9,9 @@ import LinearGradient from 'react-native-linear-gradient';
 // Import RootStackParamList to get MenuItem type correctly
 import { RootStackParamList } from '../navigation/AppNavigator'; // Adjust path
 
-// Sample nutrition data
+// <<< Backend Data Placeholder >>>
+// `nutritionFacts` should ideally come from the backend, either as part of `foodItem`
+// or fetched separately using `foodItem.id`.
 // TODO: Replace with actual fetched nutrition data if available
 const nutritionFacts = {
     servingSize: '1 slice',

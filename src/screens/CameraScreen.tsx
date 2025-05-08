@@ -72,6 +72,14 @@ const CameraScreen = () => {
                 enableShutterSound: true
             });
             console.log('Fotoğraf çekildi:', photo.path);
+
+            // <<< Backend Integration Point >>>
+            // 1. Show a loading indicator.
+            // 2. Send `photo.path` (or the image file) to your backend.
+            // 3. Backend performs OCR, AI processing, image generation.
+            // 4. Backend returns structured menu data.
+            // 5. Navigate to MenuList with the fetched data, or handle errors.
+            //    For now, we're passing the local URI.
             // setImage(photo.path); // State'e kaydet
             // setMode('preview'); // Önizleme moduna geç
             // simulateProcessing(); // İşleme simülasyonu

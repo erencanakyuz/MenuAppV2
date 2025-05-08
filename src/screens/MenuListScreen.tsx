@@ -8,7 +8,10 @@ import Svg, { Path, Text as SvgText } from 'react-native-svg';
 // Import MenuItem and RootStackParamList from your navigator
 import { MenuItem, RootStackParamList } from '../navigation/AppNavigator'; // Adjust path if necessary
 
-// sample data with macro estimates (MenuItem type is now imported)
+// <<< Backend Data Placeholder >>>
+// This `sampleMenuItems` will be replaced by data fetched from your backend
+// based on the OCR and AI processing of the scanned menu image.
+// The `MenuItem.image` will likely be a URL string from the backend.
 const sampleMenuItems: MenuItem[] = [
     {
         id: '1',
@@ -190,12 +193,24 @@ const MenuListScreen = () => {
     const navigation = useNavigation();
     const route = useRoute<RouteProp<RootStackParamList, 'MenuList'>>(); // Typed route
     const insets = useSafeAreaInsets();
-    const isLoading = false;
-    const restaurantName = "Your Restaurant";
+    const isLoading = false; // <<< Backend Integration: Set to true while fetching data
+    const restaurantName = "Your Restaurant"; // <<< Backend Data: This could come from backend
 
     // Example of how you might use imageUri from route params:
     // const scannedMenuImageUri = route.params?.imageUri;
     // console.log("Scanned Menu Image URI:", scannedMenuImageUri); // You can use this in an <Image /> if needed
+
+    // <<< Backend Integration Point >>>
+    // useEffect(() => {
+    //   if (route.params?.imageUri || route.params?.processedMenuData) {
+    //     // Option 1: If CameraScreen only sent URI, call backend here to process and get menu items.
+    //     // fetchMenuData(route.params.imageUri);
+    //     // Option 2: If CameraScreen sent processed data, use it directly.
+    //     // setMenuItems(route.params.processedMenuData);
+    //     // setIsLoading(true);
+    //     // Make API call, then setIsLoading(false) and set menu items.
+    //   }
+    // }, [route.params]);
 
     const sampleMenuItemsMemo = useMemo(() => sampleMenuItems, []);
 
@@ -226,7 +241,7 @@ const MenuListScreen = () => {
         return (
             <View style={[styles.container, styles.centered]}>
                 <ActivityIndicator animating={true} size="large" color="#10B981" />
-                <Text style={styles.loadingText}>Analyzing menu...</Text>
+                <Text style={styles.loadingText}>Analyzing menu...</Text> {/* Or "Fetching menu..." */}
             </View>
         );
     }
